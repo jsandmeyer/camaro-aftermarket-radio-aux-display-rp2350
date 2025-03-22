@@ -1,7 +1,8 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include <RP2350.h>
+#include <RP2350Wrapper.h>
+#include <Adafruit_SSD1306.h>
 #include <unordered_set>
 
 #include "GMLan.h"
@@ -26,7 +27,7 @@ protected:
     /**
      * OLED display
      */
-    //Adafruit_SSD1306 *display;
+    Adafruit_SSD1306 *display;
 public:
     virtual ~Renderer() = default;
 
@@ -34,7 +35,7 @@ public:
      * Create a Renderer
      * @param display OLED display
      */
-    explicit Renderer(/*Adafruit_SSD1306 *display*/);
+    explicit Renderer(Adafruit_SSD1306 *display);
 
     /**
      * Process a GMLAN message

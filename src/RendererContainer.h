@@ -1,8 +1,7 @@
 #ifndef RENDERER_CONTAINER_H
 #define RENDERER_CONTAINER_H
 
-#include <RP2350.h>
-#include <stddef.h>
+#include <RP2350Wrapper.h>
 #include "Renderer.h"
 
 class RendererContainer {

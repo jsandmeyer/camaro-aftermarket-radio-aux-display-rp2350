@@ -1,7 +1,7 @@
 // Ignore warnings for modules, seems RP2350 sdk has redefinition problems
 // #pragma GCC diagnostic push
 // #pragma GCC diagnostic ignored "-Wall"
-#include <RP2350.h>
+#include <RP2350Wrapper.h>
 #include <SerialUSB.h>
 #include <can2040.h>
 // #pragma GCC diagnostic pop

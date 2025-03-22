@@ -1,7 +1,7 @@
 #ifndef GMLAN_H
 #define GMLAN_H
 
-#include <RP2350.h>
+#include <RP2350Wrapper.h>
 
 // constants for GMLAN message masking & shifting
 #define GMLAN_PRI_MASK 0x1C000000 // priority is first 3 bits
