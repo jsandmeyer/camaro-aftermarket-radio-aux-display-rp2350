@@ -1,52 +1,78 @@
 #include <Arduino.h>
-// #include <RP2350.h>
-#include <ACAN2040.h>
-
-#include "Watchdog.h"
+#include <RP2350.h>
+#include <can2040.h>
+#include "GMLan.h"
 
 // communications
 constexpr auto SER_BAUD = 115200UL;
 
-ACAN2040* canBus;
+CAN2040* canBus;
 
-void my_cb(can2040 *cd, uint32_t notify, can2040_msg *msg);
+void my_cb(CAN2040* cd, CAN2040::NotificationType notify, CAN2040::Message* msg, uint32_t errorCode) {
+    switch (notify) {
+        case CAN2040::NOTIFY_RX:
+        break;
+        case CAN2040::NOTIFY_TX:
+            Serial.println("Sending CAN2040 message");
+        return;
+        case CAN2040::NOTIFY_ERROR:
+            Serial.printf("Received CAN2040 error %lx\n", errorCode);
+        return;
+        default:
+            Serial.println("Received CAN2040 unknown");
+        return;
+    }
+
+    auto canId = msg->id;
+    auto buf = msg->data;
+    auto const arbId = GMLAN_ARB(canId);
+
+    if (arbId != GMLAN_MSG_TEMPERATURE && arbId != GMLAN_MSG_PARK_ASSIST && arbId != GMLAN_MSG_CLUSTER_UNITS) {
+        return;
+    }
+
+    Serial.printf("Got: %lx -> %x %x %x %x %x %x %x %x\n", arbId, buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7]);
+}
+
+
+static void PIOx_IRQHandler() {
+    canBus->pioIrqHandler();
+}
+
+void canbus_setup() {
+    uint32_t pio_num = 0;
+    uint32_t bitrate = 33333; // was 500K
+    uint32_t gpio_rx = 26, gpio_tx = 27; // was 4,5
+
+    // Setup canbus
+    canBus->setup(pio_num);
+    canBus->callbackConfig(my_cb);
+
+    // Enable irqs
+    irq_set_exclusive_handler(PIO0_IRQ_0_IRQn, PIOx_IRQHandler);
+    NVIC_SetPriority(PIO0_IRQ_0_IRQn, 1);
+    NVIC_EnableIRQ(PIO0_IRQ_0_IRQn);
+
+    // Start canbus
+    canBus->start(bitrate, gpio_rx, gpio_tx);
+}
 
 /**
  * Main entrypoint
  * Called by int main() by framework
  */
 void setup() {
+    sleep_ms(5000);
     Serial.begin(SER_BAUD);
     Serial.println("Booting up");
 
     delay(10);
 
-    canBus = new ACAN2040(0, 27, 26, 33333, 150000000L, my_cb);
+    canBus = new CAN2040();
+    canbus_setup();
     // initializeCanBus(canBus, watchdog);
 
     pinMode(25, OUTPUT);
-}
-
-void my_cb(struct can2040 * cd, uint32_t notify, struct can2040_msg * msg) {
-    switch (notify) {
-        case CAN2040_NOTIFY_RX:
-            Serial.println("Received CAN2040 message");
-            break;
-        case CAN2040_NOTIFY_TX:
-            Serial.println("Sending CAN2040 message");
-            return;
-        case CAN2040_NOTIFY_ERROR:
-            Serial.println("Received CAN2040 error");
-            return;
-        default:
-            Serial.println("Received CAN2040 unknown");
-            return;
-    }
-
-    auto canId = msg->id;
-    auto buf = msg->data;
-
-    Serial.printf("Got: %lx -> %x %x %x %x %x %x %x %x\n", canId, buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7]);
 }
 
 /**
