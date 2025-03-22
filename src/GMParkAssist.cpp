@@ -155,12 +155,6 @@ void GMParkAssist::processParkAssistInfoMessage(const uint8_t buf[8]) {
 }
 
 /**
- * Create a GMParkAssist instance
- * @param display the OLED display from SSD1306 library
- */
-GMParkAssist::GMParkAssist(Adafruit_SSD1306* display): Renderer(display) {}
-
-/**
  * Processes the park assist message and sets state
  * @param arbId the arbitration ID GMLAN_MSG_PARK_ASSIST
  * @param buf is the buffer data from GMLAN

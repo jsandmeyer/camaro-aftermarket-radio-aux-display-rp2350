@@ -83,14 +83,6 @@ class GMParkAssist final : public Renderer {
     void processParkAssistInfoMessage(const uint8_t buf[8]);
 
 public:
-    ~GMParkAssist() override = default;
-
-    /**
-     * Create a GMParkAssist instance
-     * @param display the OLED display from SSD1306 library
-     */
-    explicit GMParkAssist(Adafruit_SSD1306 *display);
-
     /**
      * Process GMLAN message
      * @param arbId the arbitration ID GMLAN_MSG_PARK_ASSIST

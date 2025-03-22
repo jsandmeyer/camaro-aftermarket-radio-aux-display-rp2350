@@ -22,7 +22,7 @@ protected:
     /**
      * OLED display
      */
-    Adafruit_SSD1306 *display;
+    Adafruit_SSD1306 *display = nullptr;
 public:
     virtual ~Renderer() = default;
 
@@ -30,7 +30,9 @@ public:
      * Create a Renderer
      * @param display OLED display
      */
-    explicit Renderer(Adafruit_SSD1306 *display);
+    explicit Renderer(Adafruit_SSD1306 *display): display(display) {}
+
+    Renderer(): display(nullptr) {}
 
     /**
      * Process a GMLAN message
@@ -69,6 +71,12 @@ public:
      * @param newUnits the new unit data (GMLAN_VAL_CLUSTER_UNITS_*)
      */
     void setUnits(uint8_t newUnits);
+
+    /**
+     * Update the SSD1306 object
+     * @param display the new SSD1306 object
+     */
+    void setDisplay(Adafruit_SSD1306 *display);
 
     /**
      * Gets this module's recognized ARB IDs

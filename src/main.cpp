@@ -89,8 +89,12 @@ void setup() {
     const auto renderers = new RendererContainer(2);
 
     Renderer *lastRenderer = nullptr; // last renderer to render, to avoid doubles of same data
-    // renderers->setRenderer(0, new GMParkAssist(display));
-    renderers->setRenderer(1, new GMTemperature(display));
+    renderers->setRenderer(0, new GMParkAssist());
+    renderers->setRenderer(1, new GMTemperature());
+
+    for (Renderer *renderer : *renderers) {
+        renderer->setDisplay(display);
+    }
 
     const auto canBus = new CAN2040();
     const auto canHelper = new CanHelper(canBus, renderers);

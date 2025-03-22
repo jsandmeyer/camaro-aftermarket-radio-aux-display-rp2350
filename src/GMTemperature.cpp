@@ -11,12 +11,6 @@
 #include "GMLan.h"
 
 /**
- * Create a GMTemperature instance
- * @param display the OLED display from SSD1306 library
- */
-GMTemperature::GMTemperature(Adafruit_SSD1306* display) : Renderer(display) {}
-
-/**
  * Processes the exterior temperature sensor data
  * @param arbId the arbitration ID GMLAN_MSG_TEMPERATURE
  * @param buffer is the buffer data from GMLAN
