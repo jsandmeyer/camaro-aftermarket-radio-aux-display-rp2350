@@ -77,12 +77,6 @@ public:
      * @param display the new SSD1306 object
      */
     void setDisplay(Adafruit_SSD1306 *display);
-
-    /**
-     * Gets this module's recognized ARB IDs
-     * @return recognized ARB IDs
-     */
-    virtual std::unordered_set<uint32_t> getArbIds() const;
 };
 
 #endif //RENDERER_H

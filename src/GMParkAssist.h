@@ -54,11 +54,6 @@ class GMParkAssist final : public Renderer {
     uint32_t parkAssistDisplayCompare[5] = {1U, 1U, 150U, 325U, 500U};
 
     /**
-     * Holds this module's arbIds
-     */
-    std::unordered_set<uint32_t> arbIds = {GMLAN_MSG_PARK_ASSIST};
-
-    /**
      * Renders the Park Assist rectangle, blanking out the rectangle zone first
      * Rectangle will be rendered visible or invisible based on millis()
      * Does not update display
@@ -117,12 +112,6 @@ public:
      * @return the name as a string
      */
     [[nodiscard]] const char* getName() const override;
-
-    /**
-     * Gets this module's recognized ARB IDs
-     * @return recognized ARB IDs
-     */
-    std::unordered_set<uint32_t> getArbIds() const override;
 };
 
 #endif //GM_PARK_ASSIST_H

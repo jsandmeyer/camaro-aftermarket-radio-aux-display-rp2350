@@ -232,7 +232,3 @@ bool GMParkAssist::canRender() {
 const char* GMParkAssist::getName() const {
     return "GMParkAssist";
 }
-
-std::unordered_set<uint32_t> GMParkAssist::getArbIds() const {
-    return arbIds;
-}

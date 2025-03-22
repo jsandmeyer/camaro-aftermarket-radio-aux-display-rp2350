@@ -11,11 +11,6 @@ class GMTemperature final : public Renderer {
      * Stored is 2 * (temperature in degrees Celsius + 40)
      */
     uint8_t temperature = 0;
-
-    /**
-     * Holds this module's arbIds
-     */
-    std::unordered_set<uint32_t> arbIds = {GMLAN_MSG_TEMPERATURE};
 public:
     /**
      * Process GMLAN message
@@ -50,12 +45,6 @@ public:
      * @return the name as a string
      */
     [[nodiscard]] const char* getName() const override;
-
-    /**
-     * Gets this module's recognized ARB IDs
-     * @return recognized ARB IDs
-     */
-    std::unordered_set<uint32_t> getArbIds() const override;
 };
 
 

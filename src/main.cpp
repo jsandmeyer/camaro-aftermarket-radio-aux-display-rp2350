@@ -3,17 +3,76 @@
 #include <RP2350Wrapper.h>
 #include <SerialUSB.h>
 #include <can2040.h>
+#include <pico/util/queue.h>
 
 #include "Debug.h"
 #include "OLED.h"
 #include "Renderer.h"
 #include "RendererContainer.h"
-#include "CanHelper.h"
+#include "GMLan.h"
 #include "GMParkAssist.h"
 #include "GMTemperature.h"
 
-// communications
 constexpr auto SER_BAUD = 115200UL;
+
+static queue_t messageQueue;
+static auto canBus = new CAN2040();
+static std::unordered_set arbIds = {GMLAN_MSG_CLUSTER_UNITS, GMLAN_MSG_PARK_ASSIST, GMLAN_MSG_TEMPERATURE};
+
+void canBusIRQHandler() {
+    canBus->pioIrqHandler();
+}
+
+void canBusMessageCallback(CAN2040* cd, const CAN2040::NotificationType notify, CAN2040::Message* msg, const uint32_t errorCode) {
+    if (notify == CAN2040::NOTIFY_ERROR) {
+        Serial.printf("Received CAN2040 error %lx\n", errorCode);
+        return;
+    }
+
+    if (notify != CAN2040::NOTIFY_RX) {
+        Serial.printf("Received CAN2040 unexpected message - should not have happened %lx", notify);
+        return;
+    }
+
+    if (arbIds.find(GMLAN_ARB(msg->id)) == arbIds.end()) {
+        return;
+    }
+
+    if (queue_is_full(&messageQueue)) {
+        DEBUG(Serial.println("WARNING QUEUE WAS FULL"));
+    } else {
+        queue_try_add(&messageQueue, msg);
+    }
+}
+
+void processMessage(const RendererContainer* renderers) {
+    CAN2040::Message msg;
+    queue_try_remove(&messageQueue, &msg);
+
+    if (msg.id == 0) {
+        DEBUG(Serial.println("WARNING MSG IS NULL"));
+        return;
+    }
+
+    auto const arbId = GMLAN_ARB(msg.id);
+    DEBUG(Serial.printf("Core1 got message %lx", arbId));
+
+    if (arbId == GMLAN_MSG_CLUSTER_UNITS) {
+        const uint8_t units = msg.data[0] & 0x0F;
+        Serial.printf("New cluster units: 0x%02x\n", units);
+
+        for (Renderer *renderer : *renderers) {
+            renderer->setUnits(units);
+        }
+
+        return;
+    }
+
+    for (Renderer *renderer : *renderers) {
+        Serial.printf("Processing via %s ARB ID 0x%08lx\n", renderer->getName(), arbId);
+        renderer->processMessage(arbId, msg.data);
+    }
+}
 
 /**
  * Render data to display
@@ -60,17 +119,8 @@ void renderDisplay(Adafruit_SSD1306* display, const RendererContainer* renderers
     display->display();
 }
 
-/**
- * Main entrypoint
- * Called by int main() by framework
- */
-void setup() {
-    sleep_ms(5000);
-    DEBUG(Serial.begin(SER_BAUD));
-    DEBUG(Serial.println("Booting up"));
-
-    delay(10);
-
+[[noreturn]] void core1Entry() {
+    DEBUG(Serial.println("Starting core1"));
     SPI1.setRX(OLED_RX);
     SPI1.setCS(OLED_CS);
     SPI1.setSCK(OLED_SCK);
@@ -96,16 +146,38 @@ void setup() {
         renderer->setDisplay(display);
     }
 
-    const auto canBus = new CAN2040();
-    const auto canHelper = new CanHelper(canBus, renderers);
-
-    canHelper->start();
-
-    // ReSharper disable once CppDFAEndlessLoop
     while (true) {
+        if (!queue_is_empty(&messageQueue)) {
+            DEBUG(Serial.println("Core1 message!"));
+            processMessage(renderers);
+            DEBUG(Serial.println("Message handled!"));
+        }
+
         renderDisplay(display, renderers, lastRenderer);
-        Debug::processDebugInput(renderers);
     }
+}
+
+/**
+ * Main entrypoint
+ * Called by int main() by framework
+ */
+void setup() {
+    sleep_ms(5000);
+    DEBUG(Serial.begin(SER_BAUD));
+    DEBUG(Serial.println("Booting up"));
+
+    delay(10);
+
+    queue_init(&messageQueue, sizeof(CAN2040::Message), 128);
+
+    multicore_launch_core1(core1Entry);
+
+    canBus->setup(GMLAN_CAN_PIO);
+    canBus->callbackConfig(canBusMessageCallback);
+
+    irq_set_exclusive_handler(GMLAN_CAN_PIO_IRQn, canBusIRQHandler);
+    NVIC_SetPriority(GMLAN_CAN_PIO_IRQn, GMLAN_CAN_PRI);
+    NVIC_EnableIRQ(GMLAN_CAN_PIO_IRQn);
 }
 
 /**
@@ -113,5 +185,6 @@ void setup() {
  * Called by int main() from framework, but realistically will never run because setup() is [[noreturn]]
  */
 void loop() {
-    /* do nothing - loop handled inside setup() */
+    Debug::processDebugInput(&messageQueue);
+    NO_DEBUG(tight_loop_contents());
 }

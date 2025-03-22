@@ -115,7 +115,3 @@ bool GMTemperature::canRender() {
 const char* GMTemperature::getName() const {
     return "GMTemperature";
 }
-
-std::unordered_set<uint32_t> GMTemperature::getArbIds() const {
-    return arbIds;
-}

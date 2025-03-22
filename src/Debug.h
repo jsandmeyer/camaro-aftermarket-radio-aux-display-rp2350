@@ -1,17 +1,22 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
+#include <pico/util/queue.h>
+
 #if DO_DEBUG == 1
     #define DEBUG(X) X
+    #define NO_DEBUG(X)
 #else
     #define DEBUG(X)
+    #define NO_DEBUG(X) X
 #endif
 
-#include <RendererContainer.h>
+#include <can2040.h>
 
 class Debug {
+    static void tryEnqueue(queue_t* messageQueue, CAN2040::Message* message);
 public:
-    static void processDebugInput(const RendererContainer* renderers);
+    static void processDebugInput(queue_t* messageQueue);
 };
 
 
