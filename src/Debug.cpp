@@ -17,7 +17,7 @@ void Debug::tryEnqueue(queue_t* messageQueue, CAN2040::Message* message) {
     );
 
     if (queue_is_full(messageQueue)) {
-        DEBUG(Serial.println("WARNING QUEUE WAS FULL"));
+        DEBUG(Serial.print("WARNING QUEUE WAS FULL\n"));
     } else {
         queue_try_add(messageQueue, message);
     }

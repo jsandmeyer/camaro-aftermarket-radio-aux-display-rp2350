@@ -79,7 +79,7 @@ void GMParkAssist::renderDistance() const {
  * Handles the Rear Park Assist "OFF" message
  */
 void GMParkAssist::processParkAssistDisableMessage() {
-    DEBUG(Serial.println("PA OFF"));
+    DEBUG(Serial.print("PA OFF\n"));
 
     // blanking out all data will prevent future render
     lastTimestamp = 0;

@@ -44,7 +44,7 @@ void canBusMessageCallback(CAN2040* cd, const CAN2040::NotificationType notify, 
     }
 
     if (queue_is_full(&messageQueue)) {
-        DEBUG(Serial.println("WARNING QUEUE WAS FULL"));
+        DEBUG(Serial.print("WARNING QUEUE WAS FULL\n"));
     } else {
         queue_try_add(&messageQueue, msg);
     }
@@ -121,7 +121,7 @@ void renderDisplay(Adafruit_SSD1306* display, Renderer*& lastRenderer) {
 }
 
 [[noreturn]] void core1Entry() {
-    DEBUG(Serial.println("Starting core1"));
+    DEBUG(Serial.print("Starting core1\n"));
     SPI1.setRX(OLED_RX);
     SPI1.setCS(OLED_CS);
     SPI1.setSCK(OLED_SCK);
@@ -130,7 +130,7 @@ void renderDisplay(Adafruit_SSD1306* display, Renderer*& lastRenderer) {
     const auto display = new Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &SPI1, OLED_DC, OLED_RST, SPI_CS_PIN_OLED, OLED_SPI_BAUD);
 
     while (!display->begin(SSD1306_SWITCHCAPVCC)) {
-        DEBUG(Serial.println("Error configuring SSD1306"));
+        DEBUG(Serial.print("Error configuring SSD1306\n"));
         delay(500);
     }
 
@@ -142,6 +142,8 @@ void renderDisplay(Adafruit_SSD1306* display, Renderer*& lastRenderer) {
 
     Renderer *lastRenderer = nullptr; // last renderer to render, to avoid doubles of same data
 
+    DEBUG(Serial.print("Ready core1\n"));
+
     while (true) {
         processMessage();
         renderDisplay(display, lastRenderer);
@@ -151,7 +153,7 @@ void renderDisplay(Adafruit_SSD1306* display, Renderer*& lastRenderer) {
 void setup() {
     sleep_ms(2500);
     DEBUG(Serial.begin(SER_BAUD));
-    DEBUG(Serial.println("Starting core0"));
+    DEBUG(Serial.print("Starting core0\n"));
 
     delay(10);
 
@@ -165,6 +167,8 @@ void setup() {
     irq_set_exclusive_handler(GMLAN_CAN_PIO_IRQn, canBusIRQHandler);
     NVIC_SetPriority(GMLAN_CAN_PIO_IRQn, GMLAN_CAN_PRI);
     NVIC_EnableIRQ(GMLAN_CAN_PIO_IRQn);
+
+    DEBUG(Serial.print("Ready core0\n"));
 }
 
 void loop() {
