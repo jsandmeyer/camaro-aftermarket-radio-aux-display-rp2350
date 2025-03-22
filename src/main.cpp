@@ -8,7 +8,6 @@
 #include "Debug.h"
 #include "OLED.h"
 #include "Renderer.h"
-#include "RendererContainer.h"
 #include "GMLan.h"
 #include "GMParkAssist.h"
 #include "GMTemperature.h"
@@ -45,7 +44,7 @@ void canBusMessageCallback(CAN2040* cd, const CAN2040::NotificationType notify, 
     }
 }
 
-void processMessage(const RendererContainer* renderers) {
+void processMessage(std::vector<Renderer *> renderers) {
     CAN2040::Message msg;
     queue_try_remove(&messageQueue, &msg);
 
@@ -61,14 +60,14 @@ void processMessage(const RendererContainer* renderers) {
         const uint8_t units = msg.data[0] & 0x0F;
         Serial.printf("New cluster units: 0x%02x\n", units);
 
-        for (Renderer *renderer : *renderers) {
+        for (Renderer *renderer : renderers) {
             renderer->setUnits(units);
         }
 
         return;
     }
 
-    for (Renderer *renderer : *renderers) {
+    for (Renderer *renderer : renderers) {
         Serial.printf("Processing via %s ARB ID 0x%08lx\n", renderer->getName(), arbId);
         renderer->processMessage(arbId, msg.data);
     }
@@ -80,12 +79,12 @@ void processMessage(const RendererContainer* renderers) {
  * @param renderers
  * @param lastRenderer
  */
-void renderDisplay(Adafruit_SSD1306* display, const RendererContainer* renderers, Renderer*& lastRenderer) {
+void renderDisplay(Adafruit_SSD1306* display, std::vector<Renderer *> renderers, Renderer*& lastRenderer) {
     /*
      * Render new data, based on priority, taking the first which "should render"
      * It is always assumed that if a module "should render" that it has new data and must render now
      */
-    for (Renderer *renderer : *renderers) {
+    for (Renderer *renderer : renderers) {
         if (renderer->shouldRender()) {
             DEBUG(Serial.printf("Rendering [1] via %s\n", renderer->getName()));
             renderer->render();
@@ -98,7 +97,7 @@ void renderDisplay(Adafruit_SSD1306* display, const RendererContainer* renderers
      * Render old data, based on priority, taking the first which "can render"
      * Only the first module which "can render" is considered, this avoids oscillation in display choice
      */
-    for (Renderer *renderer : *renderers) {
+    for (Renderer *renderer : renderers) {
         if (renderer->canRender()) {
             // if we just rendered, don't waste time re-rendering
             if (lastRenderer == renderer) {
@@ -136,13 +135,14 @@ void renderDisplay(Adafruit_SSD1306* display, const RendererContainer* renderers
     display->clearDisplay();
     display->display();
 
-    const auto renderers = new RendererContainer(2);
+    std::vector<Renderer *> renderers = {
+        new GMParkAssist(),
+        new GMTemperature(),
+    };
 
     Renderer *lastRenderer = nullptr; // last renderer to render, to avoid doubles of same data
-    renderers->setRenderer(0, new GMParkAssist());
-    renderers->setRenderer(1, new GMTemperature());
 
-    for (Renderer *renderer : *renderers) {
+    for (Renderer *renderer : renderers) {
         renderer->setDisplay(display);
     }
 
