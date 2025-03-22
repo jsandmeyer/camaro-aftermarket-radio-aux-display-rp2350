@@ -1,12 +1,8 @@
-// Ignore warnings for modules, seems RP2350 sdk has redefinition problems
-// #pragma GCC diagnostic push
-// #pragma GCC diagnostic ignored "-Wall"
+// Must include RP2350Wrapper first, or else we get a ton of warnings
+// Need to import files in correct order with correct undefine safety
 #include <RP2350Wrapper.h>
 #include <SerialUSB.h>
 #include <can2040.h>
-// #pragma GCC diagnostic pop
-
-#include <GMLan.h>
 
 #include "CanHelper.h"
 #include "RendererContainer.h"
