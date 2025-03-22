@@ -14,9 +14,15 @@
 
 constexpr auto SER_BAUD = 115200UL;
 
+// for shared
 static queue_t messageQueue;
+
+// for core0 only
 static auto canBus = new CAN2040();
 static std::unordered_set arbIds = {GMLAN_MSG_CLUSTER_UNITS, GMLAN_MSG_PARK_ASSIST, GMLAN_MSG_TEMPERATURE};
+
+// for core1 only
+static std::vector<Renderer *> renderers;
 
 void canBusIRQHandler() {
     canBus->pioIrqHandler();
@@ -24,12 +30,12 @@ void canBusIRQHandler() {
 
 void canBusMessageCallback(CAN2040* cd, const CAN2040::NotificationType notify, CAN2040::Message* msg, const uint32_t errorCode) {
     if (notify == CAN2040::NOTIFY_ERROR) {
-        Serial.printf("Received CAN2040 error %lx\n", errorCode);
+        DEBUG(Serial.printf("Received CAN2040 error %lx\n", errorCode));
         return;
     }
 
     if (notify != CAN2040::NOTIFY_RX) {
-        Serial.printf("Received CAN2040 unexpected message - should not have happened %lx", notify);
+        DEBUG(Serial.printf("Received CAN2040 unexpected message - should not have happened %lx", notify));
         return;
     }
 
@@ -44,12 +50,10 @@ void canBusMessageCallback(CAN2040* cd, const CAN2040::NotificationType notify, 
     }
 }
 
-void processMessage(std::vector<Renderer *> renderers) {
-    CAN2040::Message msg;
-    queue_try_remove(&messageQueue, &msg);
+void processMessage() {
+    CAN2040::Message msg{.id = 0};
 
-    if (msg.id == 0) {
-        DEBUG(Serial.println("WARNING MSG IS NULL"));
+    if (!queue_try_remove(&messageQueue, &msg)) {
         return;
     }
 
@@ -57,7 +61,7 @@ void processMessage(std::vector<Renderer *> renderers) {
 
     if (arbId == GMLAN_MSG_CLUSTER_UNITS) {
         const uint8_t units = msg.data[0] & 0x0F;
-        Serial.printf("New cluster units: 0x%02x\n", units);
+        DEBUG(Serial.printf("New cluster units: 0x%02x\n", units));
 
         for (Renderer *renderer : renderers) {
             renderer->setUnits(units);
@@ -67,7 +71,7 @@ void processMessage(std::vector<Renderer *> renderers) {
     }
 
     for (Renderer *renderer : renderers) {
-        Serial.printf("Checking %s : ARB ID 0x%08lx\n", renderer->getName(), arbId);
+        DEBUG(Serial.printf("Checking %s : ARB ID 0x%08lx\n", renderer->getName(), arbId));
         renderer->processMessage(arbId, msg.data);
     }
 }
@@ -75,10 +79,9 @@ void processMessage(std::vector<Renderer *> renderers) {
 /**
  * Render data to display
  * @param display
- * @param renderers
  * @param lastRenderer
  */
-void renderDisplay(Adafruit_SSD1306* display, std::vector<Renderer *> renderers, Renderer*& lastRenderer) {
+void renderDisplay(Adafruit_SSD1306* display, Renderer*& lastRenderer) {
     /*
      * Render new data, based on priority, taking the first which "should render"
      * It is always assumed that if a module "should render" that it has new data and must render now
@@ -134,30 +137,21 @@ void renderDisplay(Adafruit_SSD1306* display, std::vector<Renderer *> renderers,
     display->clearDisplay();
     display->display();
 
-    const std::vector<Renderer *> renderers = {
-        new GMParkAssist(display),
-        new GMTemperature(display),
-    };
+    renderers.push_back(new GMParkAssist(display));
+    renderers.push_back(new GMTemperature(display));
 
     Renderer *lastRenderer = nullptr; // last renderer to render, to avoid doubles of same data
 
     while (true) {
-        if (!queue_is_empty(&messageQueue)) {
-            processMessage(renderers);
-        }
-
-        renderDisplay(display, renderers, lastRenderer);
+        processMessage();
+        renderDisplay(display, lastRenderer);
     }
 }
 
-/**
- * Main entrypoint
- * Called by int main() by framework
- */
 void setup() {
-    sleep_ms(5000);
+    sleep_ms(2500);
     DEBUG(Serial.begin(SER_BAUD));
-    DEBUG(Serial.println("Booting up"));
+    DEBUG(Serial.println("Starting core0"));
 
     delay(10);
 
@@ -173,11 +167,7 @@ void setup() {
     NVIC_EnableIRQ(GMLAN_CAN_PIO_IRQn);
 }
 
-/**
- * Loop entrypoint
- * Called by int main() from framework, but realistically will never run because setup() is [[noreturn]]
- */
 void loop() {
-    Debug::processDebugInput(&messageQueue);
     NO_DEBUG(tight_loop_contents());
+    Debug::processDebugInput(&messageQueue);
 }

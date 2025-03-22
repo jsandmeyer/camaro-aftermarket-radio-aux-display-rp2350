@@ -3,7 +3,18 @@
 #include "GMLan.h"
 
 void Debug::tryEnqueue(queue_t* messageQueue, CAN2040::Message* message) {
-    Serial.printf("DEBUG MESSAGE ARB ID=%08lx BUF={%02x %02x %02x %02x %02x %02x %02x %02x}\n", message->id, message->data[0], message->data[1], message->data[2], message->data[3], message->data[4], message->data[5], message->data[6], message->data[7]);
+    Serial.printf(
+        "DEBUG MESSAGE ARB ID=0x%08lx BUF={0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x}\n",
+        message->id,
+        message->data[0],
+        message->data[1],
+        message->data[2],
+        message->data[3],
+        message->data[4],
+        message->data[5],
+        message->data[6],
+        message->data[7]
+    );
 
     if (queue_is_full(messageQueue)) {
         DEBUG(Serial.println("WARNING QUEUE WAS FULL"));
