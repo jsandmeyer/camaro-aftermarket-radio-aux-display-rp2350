@@ -1,6 +1,13 @@
-#include <Arduino.h>
+// Ignore warnings for modules, seems RP2350 sdk has redefinition problems
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wall"
 #include <RP2350.h>
+#include <SerialUSB.h>
+#include <hardware/irq.h>
+#include <core_cm33.h>
 #include <can2040.h>
+#pragma GCC diagnostic pop
+
 #include "GMLan.h"
 
 // communications
