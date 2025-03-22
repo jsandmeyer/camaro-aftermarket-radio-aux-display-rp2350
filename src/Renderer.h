@@ -20,11 +20,6 @@ protected:
     uint8_t units = GMLAN_VAL_CLUSTER_UNITS_METRIC;
 
     /**
-     * This Renderer's arbIds
-     */
-    std::unordered_set<uint32_t> _arbIds;
-
-    /**
      * OLED display
      */
     Adafruit_SSD1306 *display;
@@ -79,7 +74,7 @@ public:
      * Gets this module's recognized ARB IDs
      * @return recognized ARB IDs
      */
-    virtual std::unordered_set<uint32_t> getArbIds();
+    virtual std::unordered_set<uint32_t> getArbIds() const;
 };
 
 #endif //RENDERER_H

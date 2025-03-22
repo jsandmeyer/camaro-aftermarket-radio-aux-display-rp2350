@@ -1,12 +1,7 @@
 #include <RP2350Wrapper.h>
-// #include <SerialUSB.h>
-// #include <hardware/irq.h>
-// #include <core_cm33.h>
 #include <can2040.h>
 
 #include "CanHelper.h"
-
-
 #include "GMLan.h"
 
 static volatile CanHelper *globalCanHelper = nullptr;
