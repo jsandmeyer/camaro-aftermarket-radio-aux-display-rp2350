@@ -1,6 +1,8 @@
 #ifndef GMLAN_H
 #define GMLAN_H
 
+#include <RP2350.h>
+
 // constants for GMLAN message masking & shifting
 #define GMLAN_PRI_MASK 0x1C000000 // priority is first 3 bits
 #define GMLAN_PRI_SHIFT 0x1A // shift priority right 1A (26) bits, for example 0b1110101... becomes 0b111
@@ -36,5 +38,12 @@
 // Cluster Units
 #define GMLAN_VAL_CLUSTER_UNITS_METRIC 0x00
 #define GMLAN_VAL_CLUSTER_UNITS_IMPERIAL 0x05
+
+#define GMLAN_CAN_BITRATE 33333UL
+#define GMLAN_CAN_PIO 0
+#define GMLAN_CAN_PIO_IRQn PIO0_IRQ_0_IRQn
+#define GMLAN_CAN_PRI 1
+#define GMLAN_CAN_RX 26
+#define GMLAN_CAN_TX 27
 
 #endif //GMLAN_H

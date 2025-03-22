@@ -1,14 +1,18 @@
-#ifndef CANHELPER_H
-#define CANHELPER_H
+#ifndef CAN_HELPER_H
+#define CAN_HELPER_H
 
 #include <can2040.h>
+#include "RendererContainer.h"
 
 class CanHelper {
-    CAN2040* canBus = nullptr;
+    CAN2040* canBus;
+    RendererContainer* renderers;
+    std::unordered_set<uint32_t> arbIds;
+    [[nodiscard]] CAN2040::ReceiveCallback getHandler() const;
 public:
-    void Handle(CAN2040* cd, CAN2040::NotificationType notify, CAN2040::Message* msg, uint32_t errorCode) volatile;
-    void IRQ() volatile;
-    explicit CanHelper(CAN2040* bus);
+    void invokeIRQHandler() const volatile;
+    void start() const;
+    CanHelper(CAN2040* canBus, RendererContainer *renderers);
 };
 
-#endif //CANHELPER_H
+#endif //CAN_HELPER_H

@@ -5,71 +5,79 @@
 #include <can2040.h>
 
 #include "CanHelper.h"
+
+#include <unordered_set>
+
 #include "GMLan.h"
 
-//static volatile CAN2040 *canBus = nullptr;
-static volatile CanHelper *ch = nullptr;
+static volatile CanHelper *globalCanHelper = nullptr;
 
-static void invokeIRQHandler() {
-    if (!ch) {
-       // todo panic
-    }
-    ch->IRQ();
+static void globalInvokeIRQHandler() {
+    globalCanHelper->invokeIRQHandler();
 }
 
-static void invokeHandle(CAN2040* cd, CAN2040::NotificationType notify, CAN2040::Message* msg, uint32_t errorCode) {
-    if (!ch) {
-       // todo panic
-    }
-    ch->Handle(cd, notify, msg, errorCode);
+CAN2040::ReceiveCallback CanHelper::getHandler() const {
+    return [this](CAN2040* cd, const CAN2040::NotificationType notify, CAN2040::Message* msg, const uint32_t errorCode) {
+        switch (notify) {
+            case CAN2040::NOTIFY_RX:
+                // ok
+                break;
+            case CAN2040::NOTIFY_TX:
+                Serial.println("Sending CAN2040 message - should not have happened");
+                return;
+            case CAN2040::NOTIFY_ERROR:
+                Serial.printf("Received CAN2040 error %lx\n", errorCode);
+                return;
+            default:
+                Serial.println("Received CAN2040 unknown message - should not have happened");
+                return;
+        }
+
+        auto const arbId = GMLAN_ARB(msg->id);
+
+        if (arbId == GMLAN_MSG_CLUSTER_UNITS) {
+            const uint8_t units = msg->data[0] & 0x0F;
+            Serial.printf("New cluster units: 0x%02x\n", units);
+
+            for (Renderer *renderer : *renderers) {
+                renderer->setUnits(units);
+            }
+
+            return;
+        }
+
+        if (arbIds.find(arbId) == arbIds.end()) {
+            return;
+        }
+
+        for (Renderer *renderer : *renderers) {
+            Serial.printf("Processing via %s ARB ID 0x%08lx\n", renderer->getName(), arbId);
+            renderer->processMessage(arbId, msg->data);
+        }
+    };
 }
 
-void CanHelper::Handle(CAN2040* cd, CAN2040::NotificationType notify, CAN2040::Message* msg, uint32_t errorCode) volatile {
-    switch (notify) {
-        case CAN2040::NOTIFY_RX:
-            break;
-        case CAN2040::NOTIFY_TX:
-            Serial.println("Sending CAN2040 message");
-        return;
-        case CAN2040::NOTIFY_ERROR:
-            Serial.printf("Received CAN2040 error %lx\n", errorCode);
-        return;
-        default:
-            Serial.println("Received CAN2040 unknown");
-        return;
-    }
-
-    auto canId = msg->id;
-    auto buf = msg->data;
-    auto const arbId = GMLAN_ARB(canId);
-
-    if (arbId != GMLAN_MSG_TEMPERATURE && arbId != GMLAN_MSG_PARK_ASSIST && arbId != GMLAN_MSG_CLUSTER_UNITS) {
-        return;
-    }
-
-    Serial.printf("Got: %lx -> %x %x %x %x %x %x %x %x\n", arbId, buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7]);
-    // todo pass back
-}
-
-void CanHelper::IRQ() volatile {
+void CanHelper::invokeIRQHandler() const volatile {
     canBus->pioIrqHandler();
 }
 
-CanHelper::CanHelper(CAN2040* bus): canBus(bus) {
-    if (ch) {
-       // todo panic
+CanHelper::CanHelper(CAN2040* canBus, RendererContainer *renderers): canBus(canBus), renderers(renderers) {
+    globalCanHelper = this;
+
+    canBus->setup(GMLAN_CAN_PIO);
+    canBus->callbackConfig(this->getHandler());
+
+    irq_set_exclusive_handler(GMLAN_CAN_PIO_IRQn, globalInvokeIRQHandler);
+    NVIC_SetPriority(GMLAN_CAN_PIO_IRQn, GMLAN_CAN_PRI);
+    NVIC_EnableIRQ(GMLAN_CAN_PIO_IRQn);
+
+    for (Renderer *renderer : *renderers) {
+        for (auto arbId : renderer->getArbIds()) {
+            arbIds.insert(arbId);
+        }
     }
-    ch = this;
+}
 
-    // Setup canbus
-    canBus->setup(0);
-    canBus->callbackConfig(invokeHandle);
-
-    // Enable irqs
-    irq_set_exclusive_handler(PIO0_IRQ_0_IRQn, invokeIRQHandler);
-    NVIC_SetPriority(PIO0_IRQ_0_IRQn, 1);
-    NVIC_EnableIRQ(PIO0_IRQ_0_IRQn);
-
-    // Start canbus
-    canBus->start(33333, 26, 27);
+void CanHelper::start() const {
+    canBus->start(GMLAN_CAN_BITRATE, GMLAN_CAN_RX, GMLAN_CAN_TX);
 }
