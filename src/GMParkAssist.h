@@ -79,6 +79,12 @@ class GMParkAssist final : public Renderer {
 
 public:
     /**
+     * Create a GMParkAssist instance
+     * @param display the OLED display from SSD1306 library
+     */
+    explicit GMParkAssist(Adafruit_SSD1306 *display);
+
+    /**
      * Process GMLAN message
      * @param arbId the arbitration ID GMLAN_MSG_PARK_ASSIST
      * @param buf buffer data from GMLAN

@@ -13,6 +13,12 @@ class GMTemperature final : public Renderer {
     uint8_t temperature = 0;
 public:
     /**
+     * Create a GMTemperature instance
+     * @param display the OLED display from SSD1306 library
+     */
+    explicit GMTemperature(Adafruit_SSD1306 *display);
+
+    /**
      * Process GMLAN message
      * @param arbId the arbitration ID GMLAN_MSG_TEMPERATURE
      * @param buf buffer data from GMLAN

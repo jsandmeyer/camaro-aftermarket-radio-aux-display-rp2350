@@ -54,7 +54,6 @@ void processMessage(std::vector<Renderer *> renderers) {
     }
 
     auto const arbId = GMLAN_ARB(msg.id);
-    DEBUG(Serial.printf("Core1 got message %lx", arbId));
 
     if (arbId == GMLAN_MSG_CLUSTER_UNITS) {
         const uint8_t units = msg.data[0] & 0x0F;
@@ -68,7 +67,7 @@ void processMessage(std::vector<Renderer *> renderers) {
     }
 
     for (Renderer *renderer : renderers) {
-        Serial.printf("Processing via %s ARB ID 0x%08lx\n", renderer->getName(), arbId);
+        Serial.printf("Checking %s : ARB ID 0x%08lx\n", renderer->getName(), arbId);
         renderer->processMessage(arbId, msg.data);
     }
 }
@@ -86,7 +85,7 @@ void renderDisplay(Adafruit_SSD1306* display, std::vector<Renderer *> renderers,
      */
     for (Renderer *renderer : renderers) {
         if (renderer->shouldRender()) {
-            DEBUG(Serial.printf("Rendering [1] via %s\n", renderer->getName()));
+            DEBUG(if (renderer != lastRenderer) Serial.printf("Rendering [1] via %s\n", renderer->getName()));
             renderer->render();
             lastRenderer = renderer;
             return; // exit loop
@@ -135,22 +134,16 @@ void renderDisplay(Adafruit_SSD1306* display, std::vector<Renderer *> renderers,
     display->clearDisplay();
     display->display();
 
-    std::vector<Renderer *> renderers = {
-        new GMParkAssist(),
-        new GMTemperature(),
+    const std::vector<Renderer *> renderers = {
+        new GMParkAssist(display),
+        new GMTemperature(display),
     };
 
     Renderer *lastRenderer = nullptr; // last renderer to render, to avoid doubles of same data
 
-    for (Renderer *renderer : renderers) {
-        renderer->setDisplay(display);
-    }
-
     while (true) {
         if (!queue_is_empty(&messageQueue)) {
-            DEBUG(Serial.println("Core1 message!"));
             processMessage(renderers);
-            DEBUG(Serial.println("Message handled!"));
         }
 
         renderDisplay(display, renderers, lastRenderer);

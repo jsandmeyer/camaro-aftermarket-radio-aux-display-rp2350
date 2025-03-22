@@ -3,7 +3,7 @@
 #include "GMLan.h"
 
 void Debug::tryEnqueue(queue_t* messageQueue, CAN2040::Message* message) {
-    Serial.printf("Enqueuing message %lx -> {%x %x %x %x %x %x %x %x}\n", message->id, message->data[0], message->data[1], message->data[2], message->data[3], message->data[4], message->data[5], message->data[6], message->data[7]);
+    Serial.printf("DEBUG MESSAGE ARB ID=%08lx BUF={%02x %02x %02x %02x %02x %02x %02x %02x}\n", message->id, message->data[0], message->data[1], message->data[2], message->data[3], message->data[4], message->data[5], message->data[6], message->data[7]);
 
     if (queue_is_full(messageQueue)) {
         DEBUG(Serial.println("WARNING QUEUE WAS FULL"));
@@ -23,14 +23,14 @@ void Debug::processDebugInput(queue_t* messageQueue) {
                 tryEnqueue(messageQueue, new CAN2040::Message({
                     .id = GMLAN_R_ARB(GMLAN_MSG_CLUSTER_UNITS),
                     .dlc = 0,
-                    .data = { GMLAN_VAL_CLUSTER_UNITS_METRIC, 0, 0, 0, 0, 0, 0, 0, },
+                    .data = { GMLAN_VAL_CLUSTER_UNITS_METRIC, 0, 0, 0, 0, 0, 0, 0 },
                 }));
                 break;
             case 'i': {
                 tryEnqueue(messageQueue, new CAN2040::Message({
                     .id = GMLAN_R_ARB(GMLAN_MSG_CLUSTER_UNITS),
                     .dlc = 0,
-                    .data = { GMLAN_VAL_CLUSTER_UNITS_IMPERIAL, 0, 0, 0, 0, 0, 0, 0, },
+                    .data = { GMLAN_VAL_CLUSTER_UNITS_IMPERIAL, 0, 0, 0, 0, 0, 0, 0 },
                 }));
                 break;
             }

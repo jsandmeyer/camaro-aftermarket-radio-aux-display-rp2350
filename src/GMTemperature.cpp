@@ -11,6 +11,12 @@
 #include "GMLan.h"
 
 /**
+ * Create a GMTemperature instance
+ * @param display the OLED display from SSD1306 library
+ */
+GMTemperature::GMTemperature(Adafruit_SSD1306* display) : Renderer(display) {}
+
+/**
  * Processes the exterior temperature sensor data
  * @param arbId the arbitration ID GMLAN_MSG_TEMPERATURE
  * @param buffer is the buffer data from GMLAN
@@ -41,7 +47,6 @@ void GMTemperature::processMessage(uint32_t const arbId, uint8_t buf[8]) {
  * Updates the display
  */
 void GMTemperature::render() {
-    DEBUG(Serial.println("Render Temperature"));
     display->clearDisplay();
 
     // max text size is realistically 6 - examples "-40  F" or "190  F" or "-40  C" or "88  C"

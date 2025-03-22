@@ -32,8 +32,6 @@ public:
      */
     explicit Renderer(Adafruit_SSD1306 *display): display(display) {}
 
-    Renderer(): display(nullptr) {}
-
     /**
      * Process a GMLAN message
      * @param arbId the Arbitration ID
