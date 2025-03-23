@@ -1,6 +1,8 @@
 #include <Arduino.h>
+
 #include "Debug.h"
 #include "GMLan.h"
+#include "Flash.h"
 
 void Debug::tryEnqueue(queue_t* messageQueue, CAN2040::Message* message) {
     Serial.printf(
@@ -25,14 +27,13 @@ void Debug::tryEnqueue(queue_t* messageQueue, CAN2040::Message* message) {
     free(message);
 }
 
-void Debug::processDebugInput(queue_t* messageQueue, Flash* flash) {
+void Debug::processDebugInput(queue_t* messageQueue) {
 #if DO_DEBUG == 1
     while (Serial.available()) {
         Serial.print("\n");
         switch (const auto input = Serial.read(); input) {
             case 'm':
-                flash->saveUnits(GMLAN_VAL_CLUSTER_UNITS_METRIC);
-                Serial.printf("Saved units: %x\n", flash->getUnits());
+                Flash::saveUnits(GMLAN_VAL_CLUSTER_UNITS_METRIC);
                 tryEnqueue(messageQueue, new CAN2040::Message({
                     .id = GMLAN_R_ARB(GMLAN_MSG_CLUSTER_UNITS),
                     .dlc = 0,
@@ -40,8 +41,7 @@ void Debug::processDebugInput(queue_t* messageQueue, Flash* flash) {
                 }));
                 break;
             case 'i': {
-                flash->saveUnits(GMLAN_VAL_CLUSTER_UNITS_IMPERIAL);
-                Serial.printf("Saved units: %x\n", flash->getUnits());
+                Flash::saveUnits(GMLAN_VAL_CLUSTER_UNITS_IMPERIAL);
                 tryEnqueue(messageQueue, new CAN2040::Message({
                     .id = GMLAN_R_ARB(GMLAN_MSG_CLUSTER_UNITS),
                     .dlc = 0,

@@ -1,6 +1,4 @@
-// Must include RP2350Wrapper first, or else we get a ton of warnings
-// Need to import files in correct order with correct undefine safety
-#include <RP2350Wrapper.h>
+#include <RP2350Wrapper.h> // must include first to avoid warnings
 #include <SerialUSB.h>
 #include <can2040.h>
 #include <vector>
@@ -51,7 +49,7 @@ void canBusMessageCallback(CAN2040* cd, const CAN2040::NotificationType notify, 
     }
 
     if (arbId == GMLAN_MSG_CLUSTER_UNITS) {
-        flash->saveUnits(msg->data[0] & 0x0FU);
+        Flash::saveUnits(msg->data[0] & 0x0FU);
     }
 
     if (queue_is_full(&messageQueue)) {
@@ -154,7 +152,7 @@ void renderDisplay(Adafruit_SSD1306* display, Renderer*& lastRenderer) {
 
     Renderer *lastRenderer = nullptr; // last renderer to render, to avoid doubles of same data
 
-    const auto units = flash->getUnits();
+    const auto units = Flash::getUnits();
     Serial.printf("Got units: %x\n", units);
 
     for (Renderer *renderer : renderers) {
@@ -177,7 +175,7 @@ void setup() {
 
     delay(10);
 
-    flash = new Flash();
+    Flash::setDefaults();
 
     queue_init(&messageQueue, sizeof(CAN2040::Message), 128);
     multicore_launch_core1(core1Entry);
@@ -196,5 +194,5 @@ void setup() {
 
 void loop() {
     NO_DEBUG(tight_loop_contents());
-    Debug::processDebugInput(&messageQueue, flash);
+    Debug::processDebugInput(&messageQueue);
 }
