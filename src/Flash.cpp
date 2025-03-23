@@ -9,9 +9,10 @@ extern "C" uint8_t _EEPROM_start; // NOLINT(*-reserved-identifier)
 static uint8_t* eepromData = &_EEPROM_start;
 static intptr_t eepromWriteOffset = reinterpret_cast<intptr_t>(eepromData) - static_cast<intptr_t>(XIP_BASE);
 
-static constexpr uint8_t header[4] = {0x00, 0xCC, 0x10, 0xF7};
+static constexpr uint8_t header[4] = {0x01, 0xCC, 0x10, 0xF7};
 
-static constexpr size_t UNITS_INDEX = 2;
+// note index must start at 4 to leave room for header
+static constexpr size_t UNITS_INDEX = 4;
 static constexpr uint8_t UNITS_DEFAULT = 0;
 
 void Flash::beginCritical() {
@@ -56,6 +57,7 @@ void Flash::saveUnits(const uint8_t newUnits) {
     _data[UNITS_INDEX] = newUnits;
 
     beginCritical();
+    flash_range_erase(eepromWriteOffset, FLASH_SECTOR_SIZE);
     flash_range_program(eepromWriteOffset, _data, FLASH_PAGE_SIZE);
     endCritical();
 
