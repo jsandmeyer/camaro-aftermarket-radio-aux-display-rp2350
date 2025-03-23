@@ -40,6 +40,7 @@ void canBusMessageCallback(CAN2040* cd, const CAN2040::NotificationType notify, 
     }
 
     if (arbIds.find(GMLAN_ARB(msg->id)) == arbIds.end()) {
+        // DEBUG(Serial.printf("Wrong 0x%08lx -> 0x%08lx\n", msg->id, GMLAN_ARB(msg->id)));
         return;
     }
 
@@ -167,6 +168,8 @@ void setup() {
     irq_set_exclusive_handler(GMLAN_CAN_PIO_IRQn, canBusIRQHandler);
     NVIC_SetPriority(GMLAN_CAN_PIO_IRQn, GMLAN_CAN_PRI);
     NVIC_EnableIRQ(GMLAN_CAN_PIO_IRQn);
+
+    canBus->start(GMLAN_CAN_BITRATE, GMLAN_CAN_RX, GMLAN_CAN_TX);
 
     DEBUG(Serial.print("Ready core0\n"));
 }
