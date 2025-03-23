@@ -3,6 +3,8 @@
 #include <RP2350Wrapper.h>
 #include <SerialUSB.h>
 #include <can2040.h>
+#include <vector>
+#include <unordered_set>
 #include <pico/util/queue.h>
 
 #include "Debug.h"
@@ -123,6 +125,7 @@ void renderDisplay(Adafruit_SSD1306* display, Renderer*& lastRenderer) {
 
 [[noreturn]] void core1Entry() {
     DEBUG(Serial.print("Starting core1\n"));
+
     SPI1.setRX(OLED_RX);
     SPI1.setCS(OLED_CS);
     SPI1.setSCK(OLED_SCK);

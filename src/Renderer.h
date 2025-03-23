@@ -3,7 +3,6 @@
 
 #include <RP2350Wrapper.h>
 #include <Adafruit_SSD1306.h>
-#include <unordered_set>
 
 #include "GMLan.h"
 
