@@ -1,7 +1,6 @@
 #ifndef GM_PARK_ASSIST_H
 #define GM_PARK_ASSIST_H
 
-#include <Arduino.h>
 #include <Adafruit_SSD1306.h>
 #include "Renderer.h"
 

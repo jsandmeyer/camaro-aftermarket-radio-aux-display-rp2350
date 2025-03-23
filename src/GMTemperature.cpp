@@ -4,6 +4,7 @@
 #include <Adafruit_SSD1306.h>
 #include <Fonts/FreeSans18pt7b.h>
 
+#include "Renderer.h"
 #include "Debug.h"
 #include "GMTemperature.h"
 #include "TextHelper.h"
@@ -14,7 +15,7 @@
  * Create a GMTemperature instance
  * @param display the OLED display from SSD1306 library
  */
-GMTemperature::GMTemperature(Adafruit_SSD1306* display) : Renderer(display) {}
+GMTemperature::GMTemperature(Adafruit_SSD1306* display): Renderer(display) {}
 
 /**
  * Processes the exterior temperature sensor data

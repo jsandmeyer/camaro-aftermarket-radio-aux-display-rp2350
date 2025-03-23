@@ -1,7 +1,6 @@
 #ifndef GM_TEMPERATURE_H
 #define GM_TEMPERATURE_H
 
-#include <Arduino.h>
 #include <Adafruit_SSD1306.h>
 #include "Renderer.h"
 
