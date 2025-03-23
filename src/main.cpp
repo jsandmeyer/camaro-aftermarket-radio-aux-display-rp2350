@@ -13,6 +13,7 @@
 #include "GMLan.h"
 #include "GMParkAssist.h"
 #include "GMTemperature.h"
+#include "Flash.h"
 
 constexpr auto SER_BAUD = 115200UL;
 
@@ -21,6 +22,7 @@ static queue_t messageQueue;
 
 // for core0 only
 static auto canBus = new CAN2040();
+static Flash* flash = nullptr;
 static std::unordered_set arbIds = {GMLAN_MSG_CLUSTER_UNITS, GMLAN_MSG_PARK_ASSIST, GMLAN_MSG_TEMPERATURE};
 
 // for core1 only
@@ -41,9 +43,15 @@ void canBusMessageCallback(CAN2040* cd, const CAN2040::NotificationType notify, 
         return;
     }
 
-    if (arbIds.find(GMLAN_ARB(msg->id)) == arbIds.end()) {
+    const auto arbId = GMLAN_ARB(msg->id);
+
+    if (arbIds.find(arbId) == arbIds.end()) {
         // DEBUG(Serial.printf("Wrong 0x%08lx -> 0x%08lx\n", msg->id, GMLAN_ARB(msg->id)));
         return;
+    }
+
+    if (arbId == GMLAN_MSG_CLUSTER_UNITS) {
+        flash->saveUnits(msg->data[0] & 0x0FU);
     }
 
     if (queue_is_full(&messageQueue)) {
@@ -146,6 +154,13 @@ void renderDisplay(Adafruit_SSD1306* display, Renderer*& lastRenderer) {
 
     Renderer *lastRenderer = nullptr; // last renderer to render, to avoid doubles of same data
 
+    const auto units = flash->getUnits();
+    Serial.printf("Got units: %x\n", units);
+
+    for (Renderer *renderer : renderers) {
+        renderer->setUnits(units);
+    }
+
     DEBUG(Serial.print("Ready core1\n"));
 
     while (true) {
@@ -155,14 +170,16 @@ void renderDisplay(Adafruit_SSD1306* display, Renderer*& lastRenderer) {
 }
 
 void setup() {
-    sleep_ms(2500);
+    sleep_ms(5000);
     DEBUG(Serial.begin(SER_BAUD));
     DEBUG(Serial.print("Starting core0\n"));
+    sleep_ms(5000);
 
     delay(10);
 
-    queue_init(&messageQueue, sizeof(CAN2040::Message), 128);
+    flash = new Flash();
 
+    queue_init(&messageQueue, sizeof(CAN2040::Message), 128);
     multicore_launch_core1(core1Entry);
 
     canBus->setup(GMLAN_CAN_PIO);
@@ -179,5 +196,5 @@ void setup() {
 
 void loop() {
     NO_DEBUG(tight_loop_contents());
-    Debug::processDebugInput(&messageQueue);
+    Debug::processDebugInput(&messageQueue, flash);
 }
