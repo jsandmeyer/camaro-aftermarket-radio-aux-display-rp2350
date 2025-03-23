@@ -2,7 +2,7 @@
 #define FLASH_H
 
 class Flash {
-    static void beginCritical();
+    static bool beginCritical();
     static void endCritical();
     static bool isSetUp();
 public:

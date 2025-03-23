@@ -15,9 +15,16 @@ static constexpr uint8_t header[4] = {0x01, 0xCC, 0x10, 0xF7};
 static constexpr size_t UNITS_INDEX = 4;
 static constexpr uint8_t UNITS_DEFAULT = 0;
 
-void Flash::beginCritical() {
+bool Flash::beginCritical() {
+    if (const auto coreNum = get_core_num(); coreNum != 0) {
+        DEBUG(Serial.printf("Wrong core %s tried to modify flash!", coreNum));
+        return false;
+    }
+
     noInterrupts();
     rp2040.idleOtherCore();
+
+    return true;
 }
 
 void Flash::endCritical() {
@@ -42,10 +49,11 @@ void Flash::setDefaults() {
 
         _data[UNITS_INDEX] = UNITS_DEFAULT;
 
-        beginCritical();
-        flash_range_erase(eepromWriteOffset, FLASH_SECTOR_SIZE);
-        flash_range_program(eepromWriteOffset, _data, FLASH_PAGE_SIZE);
-        endCritical();
+        if (beginCritical()) {
+            flash_range_erase(eepromWriteOffset, FLASH_SECTOR_SIZE);
+            flash_range_program(eepromWriteOffset, _data, FLASH_PAGE_SIZE);
+            endCritical();
+        }
     }
 
     DEBUG(Serial.printf("Flash() units=%x\n", getUnits()));
@@ -56,10 +64,11 @@ void Flash::saveUnits(const uint8_t newUnits) {
     memcpy(_data, eepromData, FLASH_PAGE_SIZE);
     _data[UNITS_INDEX] = newUnits;
 
-    beginCritical();
-    flash_range_erase(eepromWriteOffset, FLASH_SECTOR_SIZE);
-    flash_range_program(eepromWriteOffset, _data, FLASH_PAGE_SIZE);
-    endCritical();
+    if (beginCritical()) {
+        flash_range_erase(eepromWriteOffset, FLASH_SECTOR_SIZE);
+        flash_range_program(eepromWriteOffset, _data, FLASH_PAGE_SIZE);
+        endCritical();
+    }
 
     DEBUG(Serial.printf("saveUnits() units=%x\n", getUnits()));
 }

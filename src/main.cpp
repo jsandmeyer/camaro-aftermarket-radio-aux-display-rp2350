@@ -20,7 +20,6 @@ static queue_t messageQueue;
 
 // for core0 only
 static auto canBus = new CAN2040();
-static Flash* flash = nullptr;
 static std::unordered_set arbIds = {GMLAN_MSG_CLUSTER_UNITS, GMLAN_MSG_PARK_ASSIST, GMLAN_MSG_TEMPERATURE};
 
 // for core1 only
@@ -69,7 +68,7 @@ void processMessage() {
     auto const arbId = GMLAN_ARB(msg.id);
 
     if (arbId == GMLAN_MSG_CLUSTER_UNITS) {
-        const uint8_t units = msg.data[0] & 0x0F;
+        const uint8_t units = msg.data[0] & 0x0FU;
         DEBUG(Serial.printf("New cluster units: 0x%02x\n", units));
 
         for (Renderer *renderer : renderers) {
@@ -153,7 +152,7 @@ void renderDisplay(Adafruit_SSD1306* display, Renderer*& lastRenderer) {
     Renderer *lastRenderer = nullptr; // last renderer to render, to avoid doubles of same data
 
     const auto units = Flash::getUnits();
-    Serial.printf("Got units: %x\n", units);
+    DEBUG(Serial.printf("Got units: %x\n", units));
 
     for (Renderer *renderer : renderers) {
         renderer->setUnits(units);
