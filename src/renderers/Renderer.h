@@ -1,7 +1,6 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include <RP2350Wrapper.h>
 #include <Adafruit_SSD1306.h>
 
 #include "util/GMLan.h"

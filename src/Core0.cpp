@@ -1,4 +1,3 @@
-#include <RP2350Wrapper.h> // must include first to avoid warnings
 #include <SerialUSB.h>
 
 #include "Core0.h"

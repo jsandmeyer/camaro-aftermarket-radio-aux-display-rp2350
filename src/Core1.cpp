@@ -1,7 +1,4 @@
-#include <RP2350Wrapper.h> // must include first to avoid warnings
 #include <SerialUSB.h>
-#include <pico/util/queue.h>
-#include <vector>
 
 #include "Core1.h"
 #include "renderers/GMParkAssist.h"
