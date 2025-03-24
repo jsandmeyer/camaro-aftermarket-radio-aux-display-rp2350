@@ -1,8 +1,8 @@
 #include <SerialUSB.h>
 #include <hardware/flash.h>
 
-#include "Flash.h"
 #include "Debug.h"
+#include "Flash.h"
 
 extern "C" uint8_t _EEPROM_start; // NOLINT(*-reserved-identifier)
 

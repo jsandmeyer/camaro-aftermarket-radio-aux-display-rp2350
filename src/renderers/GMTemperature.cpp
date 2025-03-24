@@ -1,15 +1,15 @@
-#include <Arduino.h>
-#include <math.h>
+#include <SerialUSB.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <Fonts/FreeSans18pt7b.h>
+#include <math.h>
 
-#include "Renderer.h"
-#include "Debug.h"
 #include "GMTemperature.h"
-#include "TextHelper.h"
-#include "OLED.h"
-#include "GMLan.h"
+#include "Renderer.h"
+#include "util/Debug.h"
+#include "util/GMLan.h"
+#include "util/OLED.h"
+#include "util/TextHelper.h"
 
 /**
  * Create a GMTemperature instance
@@ -20,7 +20,7 @@ GMTemperature::GMTemperature(Adafruit_SSD1306* display): Renderer(display) {}
 /**
  * Processes the exterior temperature sensor data
  * @param arbId the arbitration ID GMLAN_MSG_TEMPERATURE
- * @param buffer is the buffer data from GMLAN
+ * @param buf is the buffer data from GMLAN
  * @return
  */
 void GMTemperature::processMessage(uint32_t const arbId, uint8_t buf[8]) {

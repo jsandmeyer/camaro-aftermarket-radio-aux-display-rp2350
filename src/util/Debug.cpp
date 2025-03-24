@@ -1,8 +1,8 @@
-#include <Arduino.h>
+#include <SerialUSB.h>
 
 #include "Debug.h"
-#include "GMLan.h"
 #include "Flash.h"
+#include "GMLan.h"
 
 void Debug::tryEnqueue(queue_t* messageQueue, CAN2040::Message* message) {
     Serial.printf(

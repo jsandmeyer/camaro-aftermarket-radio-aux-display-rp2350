@@ -2,10 +2,10 @@
 #define CORE1_H
 
 #include <Adafruit_SSD1306.h>
-#include <vector>
 #include <pico/util/queue.h>
+#include <vector>
 
-#include "Renderer.h"
+#include "renderers/Renderer.h"
 
 class Core1 {
     Adafruit_SSD1306* display;

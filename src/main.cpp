@@ -3,8 +3,8 @@
 #include <can2040.h>
 #include <pico/util/queue.h>
 
-#include "Debug.h"
-#include "Flash.h"
+#include "util/Debug.h"
+#include "util/Flash.h"
 
 #include "Core0.h"
 #include "Core1.h"

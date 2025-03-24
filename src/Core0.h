@@ -5,7 +5,7 @@
 #include <pico/util/queue.h>
 #include <unordered_set>
 
-#include "GMLAN.h"
+#include "util/GMLAN.h"
 
 class Core0 {
     queue_t* messageQueue;

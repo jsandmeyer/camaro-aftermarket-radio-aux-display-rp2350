@@ -2,6 +2,7 @@
 #define GM_TEMPERATURE_H
 
 #include <Adafruit_SSD1306.h>
+
 #include "Renderer.h"
 
 class GMTemperature final : public Renderer {

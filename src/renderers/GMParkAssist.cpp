@@ -1,15 +1,15 @@
-#include <Arduino.h>
-#include <math.h>
+#include <SerialUSB.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <Fonts/FreeSans9pt7b.h>
+#include <math.h>
 
-#include "Renderer.h"
-#include "Debug.h"
 #include "GMParkAssist.h"
-#include "TextHelper.h"
-#include "OLED.h"
-#include "GMLan.h"
+#include "Renderer.h"
+#include "util/Debug.h"
+#include "util/GMLan.h"
+#include "util/OLED.h"
+#include "util/TextHelper.h"
 
 /**
  * Renders the Park Assist rectangle, blanking out the rectangle zone first

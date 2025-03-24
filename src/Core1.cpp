@@ -1,16 +1,15 @@
-#include "Core1.h"
-
 #include <RP2350Wrapper.h> // must include first to avoid warnings
 #include <SerialUSB.h>
-#include <vector>
 #include <pico/util/queue.h>
+#include <vector>
 
-#include "Debug.h"
-#include "OLED.h"
-#include "GMLan.h"
-#include "GMParkAssist.h"
-#include "GMTemperature.h"
-#include "Flash.h"
+#include "Core1.h"
+#include "renderers/GMParkAssist.h"
+#include "renderers/GMTemperature.h"
+#include "util/Debug.h"
+#include "util/Flash.h"
+#include "util/GMLan.h"
+#include "util/OLED.h"
 
 Core1::Core1(queue_t* messageQueue): messageQueue(messageQueue) {
     SPI1.setRX(OLED_RX);

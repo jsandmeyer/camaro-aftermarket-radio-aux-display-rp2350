@@ -4,7 +4,7 @@
 #include <RP2350Wrapper.h>
 #include <Adafruit_SSD1306.h>
 
-#include "GMLan.h"
+#include "util/GMLan.h"
 
 class Renderer {
 protected:

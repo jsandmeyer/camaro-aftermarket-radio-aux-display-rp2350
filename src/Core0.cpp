@@ -1,12 +1,9 @@
-#include "Core0.h"
-
 #include <RP2350Wrapper.h> // must include first to avoid warnings
 #include <SerialUSB.h>
 
-#include "Debug.h"
-#include "Flash.h"
-
-#include "Core1.h"
+#include "Core0.h"
+#include "util/Debug.h"
+#include "util/Flash.h"
 
 static auto canBus = new CAN2040();
 
