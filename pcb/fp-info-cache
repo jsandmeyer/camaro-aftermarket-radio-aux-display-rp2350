@@ -1,4 +1,4 @@
-24847206214567394
+24847206214806691
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -88909,7 +88909,7 @@ WiFi IEEE802.11 b/g/n
 RP2350_60QFN_minimal
 CON_532610771_MOD
 
-532610771 
+532610771 picoblade
 0
 9
 9
@@ -88950,8 +88950,8 @@ QFN DFN_QFN
 61
 RP2350_60QFN_minimal
 TerminalBlock_3P
-simple 3-pin terminal block, pitch 5.08mm, revamped version of bornier3
-terminal block bornier3
+Generic screw terminal, 01x03, pitch 5.08mm
+terminal block 01x03
 0
 3
 3
