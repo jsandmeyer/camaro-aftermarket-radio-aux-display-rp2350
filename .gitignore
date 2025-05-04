@@ -1,2 +1,4 @@
 .pio
 .idea
+pcb/**/*-backups
+pcb/**/~*
