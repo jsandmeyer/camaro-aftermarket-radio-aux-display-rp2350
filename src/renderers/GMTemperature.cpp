@@ -58,7 +58,7 @@ void GMTemperature::render() {
     if (units == GMLAN_VAL_CLUSTER_UNITS_IMPERIAL) {
         // F = 1.8*C + 32
         unit = 'F';
-        convertedTemperature = static_cast<uint8_t>(lround(1.8 * convertedTemperature)) + 32;
+        convertedTemperature = static_cast<int>(lround(1.8 * convertedTemperature)) + 32;
     }
 
     // extra space is to make room for degree symbol, which isn't available in font
