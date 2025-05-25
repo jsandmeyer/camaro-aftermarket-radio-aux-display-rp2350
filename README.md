@@ -1,8 +1,10 @@
 ## Camaro Temperature & Reverse Sensor Display Shim - RP2350
 
-### Differences from other repository
+### Differences from [other repository](https://github.com/jsandmeyer/camaro-aftermarket-radio-aux-display)
 
-This version is intended to work with an RP2350 (Pico 2) instead of an ATMEGA328PB (Arduino Uno mod).
+![Picture of the assembled circuit](blob/master/resources/Camaro Display RP2350.jpg)
+
+This version uses an RP2350 (Raspberry Pi Pico 2 IC) instead of an ATMEGA328PB (Arduino Uno mod).
 
 It takes advantage of the two cores so it can:
 1. Listen to the CANBus while rendering is happening, without interrupting either
@@ -14,8 +16,8 @@ This provides resources to help you build something to get the temperature displ
 This is useful if you want to have the Maestro functions to get/update vehicle data, but have the nice function and appearance of the OEM-style HVAC knobs provided by the PAC kit.
 
 ### Important
-This project is not endorsed by GM, the makers of any trim kits (PAC, iDatalink) or my aftermarket radio, any forum or their users, or anyone else, including any entities named in this repository.
-It is a personal project which I have completed, and I have taken a substantial risk to my own property by building and installing this project.
+This project is not endorsed by GM, the makers of any trim kits (PAC, iDatalink, etc) or my aftermarket radio, any forum or their users, or anyone else, including any entities named in this repository.
+It is a personal project that I have completed, and I have accepted a risk to my own property by building and installing this project.
 
 This project (except for PCB footprints supplied by KiCad's included files) is licensed under the MIT license.
 Please read the attached LICENSE document.
@@ -81,21 +83,21 @@ This uses an RP2350 MCU instead of an ATMEGA328PB.
 See the notes above.
 
 It also uses a TCAN332 transciever instead of the MCP25625 (MCP2551-style).
-The IC is effectively a drop-in replacement for the purposes of this project (but with slope control resistor no longer required).
-Because of this, only one 3.3V power suppy is necessary (in addition to the 1.1V inside the RP2350) - no more 5V with step-down.
+The IC is effectively a drop-in replacement for the MCP-2551 (except that no slope control resistor is needed).
+The main benefit is that it runs on 3.3V, so only one power suppy is necessary (in addition to the 1.1V inside the RP2350).
 
 #### Logs
 
-Temperature was easy.
+Temperature was easy to figure out, and was my first step.
 
-For my 2014 Camaro, it comes in as 0x10424060 without mask, or 0x212 with the mask.
+For my 2014 Camaro, it comes in as 0x10424060 (raw header), or 0x212 (with mask).
 The second byte `buf[1]` contains the temperature... kind-of.
 You have to divide the hex value by two, and subtract 40, to get degrees in celsius.
 
 
-The backup sensors took more work.
+The backup sensors took more work to understand, but were still straightforward.
 
-I found that they were streaming data on 0x103A80BB without mask, or 0x1D4 with the mask.
+I found that they were streaming data on 0x103A80BB (raw header), or 0x1D4 (with mask).
 
 The *second nibble* of the first byte `buf[0] & 0x0F` indicates the park-assist staus.
 A value of `0` indicates park-assist is ON, and a value of `F` indicates it is OFF.
@@ -129,8 +131,9 @@ However, for my final build, I did use the harness included in the KIT-CAM1 with
 
 I spliced into the 5060 Low-Speed GMLAN cable, the GND line, and the red "accessory power" line between the Maestro RR unit and my aftermarket radio to power the circuit board.
 
-I used a non-crossover Molex Picoblade cable to connect the circuit board to the OLED display.
+I used a non-crossover Molex Picoblade cable (pre-assembled, Molex part number 0151340703) to connect the circuit board to the OLED display.
 I had to temporarily remove a retaining clip from the RPK5 trim to install the cable.
-I believe the cable included in the RPK5 is a crossover cable, **please do not use the included display cable for this project**.
+The cable included in the RPK5 is a crossover cable, **please do not use the included display cable for this project** since all the pins will be backwards.
+The connector on this project was designed to match the use of a longer cable from Molex; and was *not* based on the design in the trim kit.
 
-See my analysis of the various harness connector configurations in the `2014 camaro connectors.xlsx` file in this repository.
+See my analysis of the various harness connector configurations in the `resources/2014 camaro connectors.xlsx` file in this repository.
