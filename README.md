@@ -2,7 +2,7 @@
 
 ### Differences from [other repository](https://github.com/jsandmeyer/camaro-aftermarket-radio-aux-display)
 
-![Picture of the assembled circuit](blob/master/resources/Camaro Display RP2350.jpg)
+![Picture of the assembled circuit](blob/master/resources/assembled-circuit.jpg "Picture of the assembled circuit")
 
 This version uses an RP2350 (Raspberry Pi Pico 2 IC) instead of an ATMEGA328PB (Arduino Uno mod).
 
