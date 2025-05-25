@@ -1,8 +1,8 @@
 ## Camaro Temperature & Reverse Sensor Display Shim - RP2350
 
-### Differences from [other repository](https://github.com/jsandmeyer/camaro-aftermarket-radio-aux-display)
+![Picture of the assembled circuit](resources/assembled-circuit.jpg "Picture of the assembled circuit")
 
-![Picture of the assembled circuit](blob/master/resources/assembled-circuit.jpg "Picture of the assembled circuit")
+### Differences from [other repository](https://github.com/jsandmeyer/camaro-aftermarket-radio-aux-display)
 
 This version uses an RP2350 (Raspberry Pi Pico 2 IC) instead of an ATMEGA328PB (Arduino Uno mod).
 
